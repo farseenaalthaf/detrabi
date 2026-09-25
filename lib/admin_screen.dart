@@ -17,7 +17,6 @@ class _AdminScreenState extends State<AdminScreen> {
   List<Map<String, dynamic>> _rules = [];
   bool _isLoading = true;
 
-  // Tracks which user row currently has a role update in flight.
   String? _updatingUserId;
 
   final List<String> _roleOptions = const ['patient', 'nurse', 'doctor', 'pharmacist', 'admin'];
@@ -47,6 +46,13 @@ class _AdminScreenState extends State<AdminScreen> {
         ..sort((a, b) => (a['full_name'] ?? '').toString().compareTo((b['full_name'] ?? '').toString()));
       _isLoading = false;
     });
+  }
+
+  Future<void> _logout() async {
+    await supabase.auth.signOut();
+    if (context.mounted) {
+      Navigator.pushReplacementNamed(context, '/');
+    }
   }
 
   Future<void> _updateUserRole(String userId, String newRole) async {
@@ -111,8 +117,6 @@ class _AdminScreenState extends State<AdminScreen> {
       ),
     );
   }
-
-  // ---------------- ADD CLINIC ----------------
 
   void _showAddClinicDialog() {
     final nameController = TextEditingController();
@@ -248,8 +252,6 @@ class _AdminScreenState extends State<AdminScreen> {
     );
   }
 
-  // ---------------- EDIT WHO GUIDELINE ----------------
-
   void _showEditRuleDialog(Map<String, dynamic> rule) {
     final descriptionController = TextEditingController(text: rule['description'] ?? '');
     bool requiresVaccine = rule['requires_vaccine'] == true;
@@ -358,6 +360,13 @@ class _AdminScreenState extends State<AdminScreen> {
         backgroundColor: const Color(0xFFF4F9F8),
         elevation: 0,
         title: const Text('System Overview', style: TextStyle(color: Color(0xFF0D3B3B))),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout, color: Color(0xFF0D3B3B)),
+            tooltip: 'Log out',
+            onPressed: _logout,
+          ),
+        ],
       ),
       body: RefreshIndicator(
         onRefresh: _loadOverview,

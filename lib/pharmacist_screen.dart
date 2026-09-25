@@ -20,10 +20,18 @@ class _PharmacistScreenState extends State<PharmacistScreen> {
 
   Future<void> _loadClinics() async {
     final data = await supabase.from('clinics').select().order('name');
+    if (!mounted) return;
     setState(() {
       _clinics = List<Map<String, dynamic>>.from(data);
       _isLoading = false;
     });
+  }
+
+  Future<void> _logout() async {
+    await supabase.auth.signOut();
+    if (context.mounted) {
+      Navigator.pushReplacementNamed(context, '/');
+    }
   }
 
   Future<void> _toggleStock(String id, bool current) async {
@@ -45,6 +53,13 @@ class _PharmacistScreenState extends State<PharmacistScreen> {
         backgroundColor: const Color(0xFFF4F9F8),
         elevation: 0,
         title: const Text('PEP Inventory', style: TextStyle(color: Color(0xFF0D3B3B))),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout, color: Color(0xFF0D3B3B)),
+            tooltip: 'Log out',
+            onPressed: _logout,
+          ),
+        ],
       ),
       body: RefreshIndicator(
         onRefresh: _loadClinics,

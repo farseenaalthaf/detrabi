@@ -99,11 +99,22 @@ class _ClinicsScreenState extends State<ClinicsScreen> {
     }
   }
 
+  // Lowercases and collapses any run of repeated letters down to one.
+  // This makes "kuttipuram" match "Kuttippuram" and similar typo/spelling
+  // variants where a letter is doubled or not.
+  String _normalize(String s) {
+    return s.toLowerCase().replaceAll(RegExp(r'(.)\1+'), r'$1');
+  }
+
   List<Map<String, dynamic>> get _filteredClinics {
     if (_searchQuery.isEmpty) return _clinics;
-    return _clinics
-        .where((c) => (c['name'] ?? '').toString().toLowerCase().contains(_searchQuery.toLowerCase()))
-        .toList();
+    final normalizedQuery = _normalize(_searchQuery);
+    return _clinics.where((c) {
+      final name = (c['name'] ?? '').toString();
+      final city = (c['city'] ?? c['area'] ?? '').toString();
+      return _normalize(name).contains(normalizedQuery) ||
+          _normalize(city).contains(normalizedQuery);
+    }).toList();
   }
 
   @override

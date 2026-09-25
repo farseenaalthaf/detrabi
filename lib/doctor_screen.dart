@@ -65,6 +65,13 @@ class _DoctorScreenState extends State<DoctorScreen> {
     });
   }
 
+  Future<void> _logout() async {
+    await supabase.auth.signOut();
+    if (context.mounted) {
+      Navigator.pushReplacementNamed(context, '/');
+    }
+  }
+
   Color _categoryColor(String? category) {
     switch (category) {
       case 'I':
@@ -182,6 +189,13 @@ class _DoctorScreenState extends State<DoctorScreen> {
         backgroundColor: const Color(0xFFF4F9F8),
         elevation: 0,
         title: const Text('Case Queue', style: TextStyle(color: Color(0xFF0D3B3B))),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout, color: Color(0xFF0D3B3B)),
+            tooltip: 'Log out',
+            onPressed: _logout,
+          ),
+        ],
       ),
       body: RefreshIndicator(
         onRefresh: _loadCases,
